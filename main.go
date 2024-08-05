@@ -31,51 +31,46 @@ func draw(w *app.Window) error {
 	// Operations from the UI
 	var ops op.Ops
 
-	var numberButton widget.Clickable
+	var button widget.Clickable
 
-	// Define the material design style
 	theme := material.NewTheme()
 
-	// Listen for events in the window
 	for {
-		// Detect the event type
-		switch eventType := w.Event().(type) {
+		eventType := w.Event()
 
-		// Sent when the application should re-render
+		switch typ := eventType.(type) {
 		case app.FrameEvent:
-			gtx := app.NewContext(&ops, eventType)
+			gtx := app.NewContext(&ops, typ)
 
-			// Flexbox layout
-			layout.Flex{
-				// Vertical alignment, from top to bottom
-				Axis: layout.Vertical,
-				// Empty space is left at the start (the top)
+			buttonLayout := layout.Flex{
+				Axis:    layout.Vertical,
 				Spacing: layout.SpaceStart,
-			}.Layout(gtx,
-				// We insert two rigid elements:
-				// First one to hold a button...
-				layout.Rigid(
-					func(gtx layout.Context) layout.Dimensions {
-						margins := layout.Inset{
-							Top:    unit.Dp(25),
-							Bottom: unit.Dp(25),
-							Right:  unit.Dp(35),
-							Left:   unit.Dp(35),
-						}
+			}
 
-						return margins.Layout(gtx,
-							func(gtx layout.Context) layout.Dimensions {
-								btn := material.Button(theme, &numberButton, "0")
-								return btn.Layout(gtx)
-							},
-						)
-					},
-				),
+			// Rigid element to hold the button
+			rigidElement := layout.Rigid(
+				func(gtx layout.Context) layout.Dimensions {
+					margins := layout.Inset{
+						Top:    unit.Dp(25),
+						Bottom: unit.Dp(25),
+						Right:  unit.Dp(35),
+						Left:   unit.Dp(35),
+					}
+
+					return margins.Layout(gtx,
+						func(gtx layout.Context) layout.Dimensions {
+							btn := material.Button(theme, &button, "Click me!")
+							return btn.Layout(gtx)
+						},
+					)
+				},
 			)
-			eventType.Frame(gtx.Ops)
-		// Sent when the application should exit
+
+			buttonLayout.Layout(gtx, rigidElement)
+			typ.Frame(&ops)
+
 		case app.DestroyEvent:
-			return eventType.Err
+			os.Exit(0)
 		}
 	}
 }
