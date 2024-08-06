@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -31,43 +32,33 @@ func draw(w *app.Window) error {
 	// Operations from the UI
 	var ops op.Ops
 
-	var button widget.Clickable
-
 	theme := material.NewTheme()
 
 	for {
 		eventType := w.Event()
 
 		switch typ := eventType.(type) {
+
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
 
-			buttonLayout := layout.Flex{
+			var numberButtons [10]widget.Clickable
+			var rigidElements []layout.FlexChild
+
+			flexbox := layout.Flex{
 				Axis:    layout.Vertical,
-				Spacing: layout.SpaceStart,
+				Spacing: layout.SpaceAround,
 			}
 
-			// Rigid element to hold the button
-			rigidElement := layout.Rigid(
-				func(gtx layout.Context) layout.Dimensions {
-					margins := layout.Inset{
-						Top:    unit.Dp(25),
-						Bottom: unit.Dp(25),
-						Right:  unit.Dp(35),
-						Left:   unit.Dp(35),
-					}
+			for i := 0; i <= 9; i++ {
+				button := material.Button(theme, &numberButtons[i], strconv.Itoa(i))
+				rigidElement := layout.Rigid(button.Layout)
+				rigidElements = append(rigidElements, rigidElement)
+			}
 
-					return margins.Layout(gtx,
-						func(gtx layout.Context) layout.Dimensions {
-							btn := material.Button(theme, &button, "Click me!")
-							return btn.Layout(gtx)
-						},
-					)
-				},
-			)
+			flexbox.Layout(gtx, rigidElements...)
 
-			buttonLayout.Layout(gtx, rigidElement)
-			typ.Frame(&ops)
+			typ.Frame(gtx.Ops)
 
 		case app.DestroyEvent:
 			os.Exit(0)
