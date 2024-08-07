@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -34,6 +34,13 @@ func draw(w *app.Window) error {
 
 	theme := material.NewTheme()
 
+	var numberButtons [10]widget.Clickable
+	var numberButtonStyles [10]material.ButtonStyle
+
+	for i, btn := range numberButtons {
+		numberButtonStyles[i] = material.Button(theme, &btn, fmt.Sprintf("%d", i))
+	}
+
 	for {
 		eventType := w.Event()
 
@@ -42,7 +49,6 @@ func draw(w *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
 
-			var numberButtons [10]widget.Clickable
 			var rigidElements []layout.FlexChild
 
 			flexbox := layout.Flex{
@@ -50,9 +56,8 @@ func draw(w *app.Window) error {
 				Spacing: layout.SpaceAround,
 			}
 
-			for i := 0; i <= 9; i++ {
-				button := material.Button(theme, &numberButtons[i], strconv.Itoa(i))
-				rigidElement := layout.Rigid(button.Layout)
+			for _, btn := range numberButtonStyles {
+				rigidElement := layout.Rigid(btn.Layout)
 				rigidElements = append(rigidElements, rigidElement)
 			}
 
